@@ -25,11 +25,11 @@ if(WIN32)
     find_library(MSWSOCK_LIB mswsock)
 endif()
 
-add_executable(${PROJECT_NAME}
-    src/main.cpp
-    src/http/request.cpp
-    src/http/response.cpp
+file(GLOB_RECURSE HTTP_FRAMEWORK_SOURCES
+    "src/*.cpp"
 )
+
+add_executable(${PROJECT_NAME} ${HTTP_FRAMEWORK_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
