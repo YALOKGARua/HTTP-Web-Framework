@@ -21,8 +21,7 @@ option(ENABLE_STATIC_ANALYSIS "Enable static analysis" OFF)
 find_package(Threads REQUIRED)
 
 if(WIN32)
-    find_library(WS2_32_LIB ws2_32)
-    find_library(MSWSOCK_LIB mswsock)
+    set(WINDOWS_LIBRARIES ws2_32 mswsock)
 endif()
 
 file(GLOB_RECURSE HTTP_FRAMEWORK_SOURCES
@@ -34,8 +33,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 target_link_libraries(${PROJECT_NAME} 
     Threads::Threads
-    $<$<PLATFORM_ID:Windows>:${WS2_32_LIB}>
-    $<$<PLATFORM_ID:Windows>:${MSWSOCK_LIB}>
+    ${WINDOWS_LIBRARIES}
 )
 
 add_executable(http_framework_demo src/simple.cpp)
@@ -43,8 +41,7 @@ target_include_directories(http_framework_demo PRIVATE include)
 
 target_link_libraries(http_framework_demo
     Threads::Threads
-    $<$<PLATFORM_ID:Windows>:${WS2_32_LIB}>
-    $<$<PLATFORM_ID:Windows>:${MSWSOCK_LIB}>
+    ${WINDOWS_LIBRARIES}
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
