@@ -30,7 +30,6 @@ file(GLOB_RECURSE HTTP_FRAMEWORK_SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${HTTP_FRAMEWORK_SOURCES})
-
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 target_link_libraries(${PROJECT_NAME} 
@@ -39,12 +38,14 @@ target_link_libraries(${PROJECT_NAME}
     $<$<PLATFORM_ID:Windows>:${MSWSOCK_LIB}>
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG_MODE)
-    target_compile_options(${PROJECT_NAME} PRIVATE -g -O0)
-else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -O3 -DNDEBUG)
-endif()
+add_executable(http_framework_demo src/simple.cpp)
+target_include_directories(http_framework_demo PRIVATE include)
+
+target_link_libraries(http_framework_demo
+    Threads::Threads
+    $<$<PLATFORM_ID:Windows>:${WS2_32_LIB}>
+    $<$<PLATFORM_ID:Windows>:${MSWSOCK_LIB}>
+)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
@@ -73,10 +74,18 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 
+set_target_properties(http_framework_demo PROPERTIES
+    OUTPUT_NAME "http-framework-demo"
+)
+
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
+)
+
+install(TARGETS http_framework_demo
+    RUNTIME DESTINATION bin
 )
 
 install(DIRECTORY include/ DESTINATION include/http-framework

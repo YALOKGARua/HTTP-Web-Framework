@@ -9,44 +9,104 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    name: Create Release
+  build-windows-exe:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup MSVC
+        uses: microsoft/setup-msbuild@v1.3
+        
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=20
+        
+      - name: Build
+        run: cmake --build build --config Release --target http_framework_demo
+        
+      - name: Create package
+        run: |
+          mkdir -p dist
+          copy build\Release\http-framework-demo.exe dist\http-framework.exe
+          copy README.md dist\
+          copy LICENSE dist\
+          
+      - name: Create Windows Archive
+        run: powershell Compress-Archive -Path dist\* -DestinationPath http-framework-windows-${{ github.ref_name }}.zip
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: http-framework-windows-${{ github.ref_name }}.zip
+          
+  create-release-files:
+    name: Create Other Platforms Files
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Create Dummy Files
-      run: |
-        mkdir -p dist
-        echo "# HTTP Framework Windows Binary" > dist/http-framework-windows.txt
-        echo "# HTTP Framework Linux Binary" > dist/http-framework-linux.txt
-        echo "# HTTP Framework macOS Binary" > dist/http-framework-macos.txt
-        echo "Version: ${GITHUB_REF_NAME}" >> dist/http-framework-windows.txt
-        echo "Version: ${GITHUB_REF_NAME}" >> dist/http-framework-linux.txt
-        echo "Version: ${GITHUB_REF_NAME}" >> dist/http-framework-macos.txt
-        cp README.md LICENSE dist/
+      - name: Checkout code
+        uses: actions/checkout@v4
         
-        cd dist
-        zip -r http-framework-windows-${GITHUB_REF_NAME}.zip http-framework-windows.txt README.md LICENSE
-        tar -czf http-framework-linux-${GITHUB_REF_NAME}.tar.gz http-framework-linux.txt README.md LICENSE
-        tar -czf http-framework-macos-${GITHUB_REF_NAME}.tar.gz http-framework-macos.txt README.md LICENSE
+      - name: Create Dummy Files
+        run: |
+          mkdir -p dist/linux dist/macos
+          echo "# HTTP Framework Linux Binary" > dist/linux/http-framework
+          echo "# HTTP Framework macOS Binary" > dist/macos/http-framework
+          echo "Version: ${GITHUB_REF_NAME}" >> dist/linux/http-framework
+          echo "Version: ${GITHUB_REF_NAME}" >> dist/macos/http-framework
+          chmod +x dist/linux/http-framework dist/macos/http-framework
+          cp README.md LICENSE dist/linux/
+          cp README.md LICENSE dist/macos/
+          
+      - name: Create Archives
+        run: |
+          tar -czf http-framework-linux-${GITHUB_REF_NAME}.tar.gz -C dist/linux .
+          tar -czf http-framework-macos-${GITHUB_REF_NAME}.tar.gz -C dist/macos .
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: other-platforms
+          path: |
+            http-framework-linux-${{ github.ref_name }}.tar.gz
+            http-framework-macos-${{ github.ref_name }}.tar.gz
+  
+  create-release:
+    name: Create Release
+    needs: [build-windows-exe, create-release-files]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
         
-    - name: Create Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "dist/http-framework-windows-*.zip,dist/http-framework-linux-*.tar.gz,dist/http-framework-macos-*.tar.gz"
-        name: HTTP Web Framework ${{ github.ref_name }}
-        body: |
-          ## HTTP Web Framework ${{ github.ref_name }}
-          
-          ### Возможности
-          - Современный HTTP сервер на C++20
-          - Поддержка WebSocket
-          - GraphQL и gRPC интеграция
-          - Event Sourcing архитектура
-          
-          ### Поддерживаемые платформы
-          - Windows x64
-          - Linux x64
-          - macOS x64 
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: List files
+        run: |
+          ls -la
+          ls -la windows-exe/
+          ls -la other-platforms/
+        
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            windows-exe/http-framework-windows-${{ github.ref_name }}.zip
+            other-platforms/http-framework-linux-${{ github.ref_name }}.tar.gz
+            other-platforms/http-framework-macos-${{ github.ref_name }}.tar.gz
+          name: HTTP Web Framework ${{ github.ref_name }}
+          body: |
+            ## HTTP Web Framework ${{ github.ref_name }}
+            
+            ### Возможности
+            - Современный HTTP сервер на C++20
+            - Поддержка WebSocket
+            - GraphQL и gRPC интеграция
+            - Event Sourcing архитектура
+            
+            ### Поддерживаемые платформы
+            - Windows x64 (исполняемый файл)
+            - Linux x64 (заглушка)
+            - macOS x64 (заглушка) 
