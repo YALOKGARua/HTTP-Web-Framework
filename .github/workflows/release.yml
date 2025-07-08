@@ -20,7 +20,12 @@ jobs:
         uses: microsoft/setup-msbuild@v1.3
         
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=20
+        run: |
+          # Убедимся, что директория build чистая
+          if (Test-Path build) {
+            Remove-Item -Recurse -Force build
+          }
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=20
         
       - name: Build
         run: cmake --build build --config Release --target http_framework_demo
