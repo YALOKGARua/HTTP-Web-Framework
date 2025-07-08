@@ -35,9 +35,16 @@
 
 ### Релизы
 Скачайте готовые бинарные файлы:
-- [Windows x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/latest/download/http-framework-windows.zip)
-- [Linux x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/latest/download/http-framework-linux.tar.gz)
-- [macOS x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/latest/download/http-framework-macos.tar.gz)
+- [Windows x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/latest/download/http-framework-windows-v1.0.3.zip) - Исполняемый файл с демонстрационным сервером
+- [Linux x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/latest/download/http-framework-linux-v1.0.3.tar.gz)
+- [macOS x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/latest/download/http-framework-macos-v1.0.3.tar.gz)
+
+### Демонстрационный сервер
+
+Для Windows доступен готовый демонстрационный сервер. После скачивания архива:
+1. Распакуйте архив
+2. Запустите `http-framework.exe`
+3. Выберите опцию "1" для запуска сервера или "2" для просмотра информации о версии
 
 ### Системные требования
 - C++20 совместимый компилятор (GCC 10+, Clang 10+, MSVC 2019+)
@@ -52,6 +59,13 @@ cd HTTP-Web-Framework
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel
+```
+
+### Сборка демонстрационного сервера
+
+```bash
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release --target http_framework_demo
 ```
 
 ### Docker
