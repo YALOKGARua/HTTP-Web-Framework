@@ -113,4 +113,9 @@ jobs:
             ### Поддерживаемые платформы
             - Windows x64 (исполняемый файл)
             - Linux x64 (заглушка)
-            - macOS x64 (заглушка) 
+            - macOS x64 (заглушка)
+            
+            ### Скачать
+            - [Windows x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/download/${{ github.ref_name }}/http-framework-windows-${{ github.ref_name }}.zip)
+            - [Linux x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/download/${{ github.ref_name }}/http-framework-linux-${{ github.ref_name }}.tar.gz)
+            - [macOS x64](https://github.com/YALOKGARua/HTTP-Web-Framework/releases/download/${{ github.ref_name }}/http-framework-macos-${{ github.ref_name }}.tar.gz) 
