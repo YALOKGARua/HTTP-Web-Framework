@@ -162,10 +162,8 @@ git push origin v1.0.0
 
 ### Локально через скрипт
 ```bash
-# Windows
 .\scripts\create_release.ps1 -Version "1.0.0" -Message "Initial release"
 
-# Linux/macOS
 ./scripts/create_release.sh -v "1.0.0" -m "Initial release"
 ```
 
