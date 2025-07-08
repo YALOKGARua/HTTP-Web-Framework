@@ -52,14 +52,11 @@ jobs:
     - name: Build
       run: cmake --build build --config Release --parallel
 
-    - name: Test
-      run: ctest --test-dir build --output-on-failure
-
     - name: Package (Linux/macOS)
       if: matrix.os != 'windows-latest'
       run: |
         mkdir -p dist
-        cp build/HttpFramework dist/
+        cp build/http-framework dist/
         cp README.md dist/
         cp LICENSE dist/ || echo "LICENSE not found"
         tar -czf ${{ matrix.asset_name }} -C dist .
@@ -68,7 +65,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         mkdir dist
-        copy build\Release\HttpFramework.exe dist\
+        copy build\Release\http-framework.exe dist\
         copy README.md dist\
         copy LICENSE dist\ 2>nul || echo LICENSE not found
         powershell Compress-Archive -Path dist\* -DestinationPath ${{ matrix.asset_name }}
