@@ -21,7 +21,6 @@ jobs:
         
       - name: Configure CMake
         run: |
-          # Убедимся, что директория build чистая
           if (Test-Path build) {
             Remove-Item -Recurse -Force build
           }
