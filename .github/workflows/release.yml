@@ -5,60 +5,46 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
-  build-and-release:
+  release:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up environment
+    - name: Create Dummy Files
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake libssl-dev zlib1g-dev
+        mkdir -p dist
+        echo "# HTTP Framework Windows Binary" > dist/http-framework-windows.txt
+        echo "# HTTP Framework Linux Binary" > dist/http-framework-linux.txt
+        echo "# HTTP Framework macOS Binary" > dist/http-framework-macos.txt
+        echo "Version: ${GITHUB_REF_NAME}" >> dist/http-framework-windows.txt
+        echo "Version: ${GITHUB_REF_NAME}" >> dist/http-framework-linux.txt
+        echo "Version: ${GITHUB_REF_NAME}" >> dist/http-framework-macos.txt
+        cp README.md LICENSE dist/
         
-    - name: Build placeholder files
-      run: |
-        mkdir -p dist/windows dist/linux dist/macos
-        echo "HTTP Framework Windows Binary (v${GITHUB_REF_NAME})" > dist/windows/http-framework.exe
-        echo "HTTP Framework Linux Binary (v${GITHUB_REF_NAME})" > dist/linux/http-framework
-        echo "HTTP Framework macOS Binary (v${GITHUB_REF_NAME})" > dist/macos/http-framework
-        chmod +x dist/linux/http-framework dist/macos/http-framework
-        cp README.md LICENSE dist/windows/
-        cp README.md LICENSE dist/linux/
-        cp README.md LICENSE dist/macos/
-
-    - name: Create archives
-      run: |
         cd dist
-        zip -r http-framework-windows-${GITHUB_REF_NAME}.zip windows/
-        tar -czf http-framework-linux-${GITHUB_REF_NAME}.tar.gz linux/
-        tar -czf http-framework-macos-${GITHUB_REF_NAME}.tar.gz macos/
-        cd ..
-        ls -la dist/
-
-    - name: Create GitHub Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
+        zip -r http-framework-windows-${GITHUB_REF_NAME}.zip http-framework-windows.txt README.md LICENSE
+        tar -czf http-framework-linux-${GITHUB_REF_NAME}.tar.gz http-framework-linux.txt README.md LICENSE
+        tar -czf http-framework-macos-${GITHUB_REF_NAME}.tar.gz http-framework-macos.txt README.md LICENSE
+        
+    - name: Create Release
+      uses: ncipollo/release-action@v1
       with:
-        name: HTTP Framework ${{ github.ref_name }}
-        draft: false
-        prerelease: false
-        files: |
-          dist/http-framework-windows-${{ github.ref_name }}.zip
-          dist/http-framework-linux-${{ github.ref_name }}.tar.gz
-          dist/http-framework-macos-${{ github.ref_name }}.tar.gz
+        artifacts: "dist/http-framework-windows-*.zip,dist/http-framework-linux-*.tar.gz,dist/http-framework-macos-*.tar.gz"
+        name: HTTP Web Framework ${{ github.ref_name }}
         body: |
-          ## HTTP Framework Release ${{ github.ref_name }}
+          ## HTTP Web Framework ${{ github.ref_name }}
           
           ### Возможности
           - Современный HTTP сервер на C++20
           - Поддержка WebSocket
           - GraphQL и gRPC интеграция
           - Event Sourcing архитектура
-          - Circuit Breaker паттерн
-          - Трассировка и мониторинг
           
           ### Поддерживаемые платформы
           - Windows x64
